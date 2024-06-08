@@ -8,13 +8,13 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="raul.ochoa.helpdesk.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="Inicio"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="raul.ochoa.helpdesk.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="Tickets"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
