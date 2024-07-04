@@ -4,10 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import raul.y.fernando.minidelta.AdaptadorMedicamentos
+import raul.y.fernando.minidelta.AdaptadorPacientes
+import raul.y.fernando.minidelta.ClaseConexion
+import raul.y.fernando.minidelta.R
+import raul.y.fernando.minidelta.dataClassMedicamentos
 import raul.y.fernando.minidelta.databinding.FragmentDashboardBinding
+import java.sql.ResultSet
+import java.sql.SQLException
+import java.sql.Statement
 
 class DashboardFragment : Fragment() {
 
@@ -28,12 +41,10 @@ class DashboardFragment : Fragment() {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
         return root
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()
