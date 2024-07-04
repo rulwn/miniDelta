@@ -29,7 +29,27 @@ CREATE TABLE PacientesBloom (
     id_habitacion INT
 );
 
+ALTER TABLE PacientesBloom
+ADD CONSTRAINT fk_pacientes_habitaciones
+FOREIGN KEY (id_habitacion) REFERENCES Habitaciones(id_habitacion) ON DELETE CASCADE;
+
+ALTER TABLE Pacientes_Medicamentos
+ADD CONSTRAINT fk_pacientes_medicamentos_pacientes
+FOREIGN KEY (ID_Paciente) REFERENCES PacientesBloom(ID_Paciente) ON DELETE CASCADE;
+
+ALTER TABLE Pacientes_Medicamentos
+ADD CONSTRAINT fk_pacientes_medicamentos_medicamentos
+FOREIGN KEY (ID_Medicamento) REFERENCES Medicamentos(ID_Medicamento) ON DELETE CASCADE;
+
 CREATE SEQUENCE pacientesBloomSeq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE SEQUENCE habitacionesBloomSeq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE SEQUENCE MedicamentosBloomSeq
 START WITH 1
 INCREMENT BY 1;
 
@@ -41,10 +61,6 @@ BEGIN
     INTO: NEW.ID_Paciente 
     FROM DUAL;
 END;
-CREATE SEQUENCE habitacionesBloomSeq
-START WITH 1
-INCREMENT BY 1;
-
 CREATE OR REPLACE TRIGGER Trigger_habitaciones
 BEFORE INSERT ON habitaciones 
 FOR EACH ROW 
@@ -53,10 +69,6 @@ BEGIN
     INTO: NEW.id_habitacion 
     FROM DUAL;
 END;
-CREATE SEQUENCE MedicamentosBloomSeq
-START WITH 1
-INCREMENT BY 1;
-
 CREATE OR REPLACE TRIGGER Trigger_medicamentos
 BEFORE INSERT ON Medicamentos 
 FOR EACH ROW 
@@ -66,19 +78,19 @@ BEGIN
     FROM DUAL;
 END;
 
-Select * from PacientesBloom;
-Select * from habitaciones;
-INSERT ALL
-    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('Ana Carla', 'Gómez Lopez', 30, 'Asma', 1)
-    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('Carlos Alberto', 'López Lozano', 50, 'Diabetes', 2)
-    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('María Manzana', 'Rodríguez Patudo', 40, 'Hipertensión', 3)
-SELECT DUMMY FROM DUAL;
+
 INSERT ALL
     INTO Habitaciones (Numero_Habitacion, Numero_Cama) VALUES (1, 1)
     INTO Habitaciones (Numero_Habitacion, Numero_Cama) VALUES (2, 2)
     INTO Habitaciones (Numero_Habitacion, Numero_Cama) VALUES (3, 1)
     INTO Habitaciones (Numero_Habitacion, Numero_Cama) VALUES (3, 1)
 SELECT 1 FROM DUAL;
+INSERT ALL
+    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('Ana Carla', 'Gómez Lopez', 30, 'Asma', 1)
+    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('Carlos Alberto', 'López Lozano', 50, 'Diabetes', 2)
+    INTO PacientesBloom (Nombres, Apellidos, Edad, Enfermedad, id_habitacion) VALUES ('María Manzana', 'Rodríguez Patudo', 40, 'Hipertensión', 3)
+SELECT DUMMY FROM DUAL;
+
 select * from medicamentos;
 INSERT ALL
     INTO Medicamentos (Nombre_Medicamento, Descripcion)
@@ -96,17 +108,7 @@ SELECT DUMMY FROM DUAL;
 
 
 
-ALTER TABLE PacientesBloom
-ADD CONSTRAINT fk_pacientes_habitaciones
-FOREIGN KEY (id_habitacion) REFERENCES Habitaciones(id_habitacion);
 
-ALTER TABLE Pacientes_Medicamentos
-ADD CONSTRAINT fk_pacientes_medicamentos_pacientes
-FOREIGN KEY (ID_Paciente) REFERENCES PacientesBloom(ID_Paciente);
-
-ALTER TABLE Pacientes_Medicamentos
-ADD CONSTRAINT fk_pacientes_medicamentos_medicamentos
-FOREIGN KEY (ID_Medicamento) REFERENCES Medicamentos(ID_Medicamento);
 
 DROP TABLE Pacientes_Medicamentos CASCADE CONSTRAINTS;
 
@@ -118,8 +120,15 @@ DROP TABLE Medicamentos CASCADE CONSTRAINTS;
 -- Elimina las secuencias
 DROP SEQUENCE pacientesBloomSeq;
 DROP SEQUENCE habitacionesBloomSeq;
+DROP SEQUENCE MedicamentosBloomSeq;
+
+DELETE FROM PacientesBloom WHERE ID_Paciente = 1
 
 -- Elimina los triggers
 DROP TRIGGER Trigger_Pacientes;
 DROP TRIGGER Trigger_habitaciones;
-SELECT p.ID_Paciente, p.Nombres, p.Apellidos, p.Edad, p.Enfermedad, h.Numero_Habitacion, h.Numero_Cama FROM PacientesBloom p INNER JOIN Habitaciones h ON p.id_habitacion = h.id_habitacion;
+
+
+Select * from PacientesBloom;
+Select * from habitaciones;
+SELECT p.ID_Paciente, p.Nombres, p.Apellidos, p.Edad, p.Enfermedad,h.id_habitacion, h.Numero_Habitacion, h.Numero_Cama FROM PacientesBloom p INNER JOIN Habitaciones h ON p.id_habitacion = h.id_habitacion
