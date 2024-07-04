@@ -40,8 +40,49 @@ class DashboardFragment : Fragment() {
 
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
+        val rcvMedicamentos = root.findViewById<RecyclerView>(R.id.recyclerViewMedicamentos)
+        rcvMedicamentos.layoutManager = LinearLayoutManager(requireContext())
+        CoroutineScope(Dispatchers.IO).launch{
+            val medicamentosDB = obtenerDatos()
+            withContext(Dispatchers.Main){
+                val miAdaptador = AdaptadorMedicamentos(medicamentosDB)
+                rcvMedicamentos.adapter = miAdaptador
+            }
+        }
         return root
+    }
+    private fun obtenerDatos(): List<dataClassMedicamentos> {
+        val medicamentos = mutableListOf<dataClassMedicamentos>()
+        val objConexion = ClaseConexion().cadenaConexion()
+        var statement: Statement? = null
+        var resultSet: ResultSet? = null
+
+        try {
+            if (objConexion != null) {
+                statement = objConexion.createStatement()
+                resultSet = statement.executeQuery("SELECT * FROM Medicamentos")
+
+                while (resultSet.next()) {
+                    val id_medicamento = resultSet.getInt("ID_Medicamento")
+                    val nombreMedicamento = resultSet.getString("Nombre_Medicamento")
+                    val Descripcion = resultSet.getString("Descripcion")
+                    val medicamento = dataClassMedicamentos(id_medicamento, nombreMedicamento, Descripcion)
+                    medicamentos.add(medicamento)
+                }
+            }
+        } catch (e: SQLException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                resultSet?.close()
+                statement?.close()
+                objConexion?.close()
+            } catch (e: SQLException) {
+                e.printStackTrace()
+            }
+        }
+
+        return medicamentos
     }
 
 
