@@ -23,16 +23,6 @@
         app:layout_constraintVertical_bias="0.304" />
 
     <ImageView
-        android:id="@+id/imgAtras"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_flecha" />
-
-    <ImageView
         android:id="@+id/imgPaciente"
         android:layout_width="80dp"
         android:layout_height="80dp"
@@ -172,7 +162,7 @@
         app:layout_constraintVertical_bias="0.238" />
 
     <Button
-        android:id="@+id/btnContinuar"
+        android:id="@+id/btnAgregarMedicamento"
         style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="333dp"
         android:layout_height="60dp"
@@ -280,6 +270,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.734" />
+
+    <ImageView
+        android:id="@+id/imgAtras"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_flecha" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
