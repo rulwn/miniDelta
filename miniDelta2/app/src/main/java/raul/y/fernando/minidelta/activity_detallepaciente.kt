@@ -1,11 +1,15 @@
 package raul.y.fernando.minidelta
 
+import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -13,12 +17,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.sql.SQLException
 import java.sql.Statement
+
 
 class activity_detallepaciente : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +36,7 @@ class activity_detallepaciente : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         val txtNombre = findViewById<TextView>(R.id.txtNombre)
         val txtEdad = findViewById<TextView>(R.id.txtEdad)
         val txtEnfermedad = findViewById<TextView>(R.id.txtEnfermedad)
@@ -38,6 +45,8 @@ class activity_detallepaciente : AppCompatActivity() {
         val imgAtras = findViewById<ImageView>(R.id.imgAtras)
         val btnBorrar = findViewById<Button>(R.id.btnBorrar)
         val btnEditar = findViewById<Button>(R.id.btnEditar)
+        val btnRecetar = findViewById<Button>(R.id.btnContinuar)
+        val rcvPacienteMedicamento = findViewById<RecyclerView>(R.id.recyclerViewPacienteMedicamento)
 
         val ID_Paciente = intent.getIntExtra("ID_Paciente", 0)
         val nombres = intent.getStringExtra("Nombres")
@@ -135,7 +144,7 @@ class activity_detallepaciente : AppCompatActivity() {
                 val nuevoNumeroHabitacion = txtNuevoNumeroHabitacion.text.toString().toInt()
                 val nuevoNumeroCama = txtNuevoNumeroCama.text.toString().toInt()
 
-                actualizarPaciente( ID_Paciente, nuevoNombre, nuevoApellido,  nuevaEdad, nuevaEnfermedad, nuevoNumeroHabitacion, nuevoNumeroCama)
+                actualizarPaciente(ID_Paciente, nuevoNombre, nuevoApellido,  nuevaEdad, nuevaEnfermedad, nuevoNumeroHabitacion, nuevoNumeroCama)
             }
             builder.setNegativeButton("Cancelar", null)
 
@@ -147,6 +156,50 @@ class activity_detallepaciente : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("ir_atras", true)
             startActivity(intent)
+        }
+
+        btnRecetar.setOnClickListener{
+            //aqui llamar al dialog
+
+        }
+    }
+
+    class RecetarDialog(
+        context: Context,
+        private val medicamentos: List<String>,
+        private val listener: OnRecetarListener
+    ) : Dialog(context) {
+
+        interface OnRecetarListener {
+            fun onRecetar(medicamento: String, dosis: String)
+        }
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.customdialog)
+
+            val spnMedicamento: Spinner = findViewById(R.id.spnMedicamento)
+            val txtHorario: EditText = findViewById(R.id.txtHorario)
+            val btnRecetado: Button = findViewById(R.id.btnRecetado)
+            val txtCancel: TextView = findViewById(R.id.txtCancel)
+
+            val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, medicamentos)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spnMedicamento.adapter = adapter
+
+            btnRecetado.setOnClickListener {
+                val medicamento = spnMedicamento.selectedItem.toString()
+                txtHorario.setOnClickListener {
+
+                }
+                val horario = txtHorario.text.toString()
+                listener.onRecetar(medicamento, horario)
+                dismiss()
+            }
+
+            txtCancel.setOnClickListener {
+                dismiss()
+            }
         }
     }
 
@@ -188,4 +241,5 @@ class activity_detallepaciente : AppCompatActivity() {
             }
         }
     }
+
 }

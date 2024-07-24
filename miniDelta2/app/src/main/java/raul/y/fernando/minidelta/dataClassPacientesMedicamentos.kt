@@ -1,10 +1,10 @@
 package raul.y.fernando.minidelta
 
-import oracle.sql.DATE
+import java.sql.Date
 
 data class dataClassPacientesMedicamentos(
     val ID_pacientes_medicamentos: Int,
     val id_paciente: Int,
-    val id_medicamento: Int,
-    val Hora_Aplicacion: DATE
+    val Nombre_Medicamento: String,
+    val Hora_Aplicacion: Date
 )
