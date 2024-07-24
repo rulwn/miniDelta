@@ -1,5 +1,6 @@
 package raul.y.fernando.minidelta
 
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -7,7 +8,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import raul.y.fernando.minidelta.databinding.ActivityMainBinding
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +36,11 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
         if (intent.getBooleanExtra("ir_atras", false)) {
             navController.navigate(R.id.navigation_home)
+        }
+        val fab = findViewById<ExtendedFloatingActionButton>(R.id.extended_fab)
+        fab.setOnClickListener {
+            val intent = Intent(this, activity_agregarPacientes::class.java)
+            startActivity(intent)
         }
     }
 }

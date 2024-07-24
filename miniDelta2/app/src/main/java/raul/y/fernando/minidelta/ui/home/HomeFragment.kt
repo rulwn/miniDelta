@@ -41,12 +41,23 @@ class HomeFragment : Fragment() {
             withContext(Dispatchers.Main){
                 val miAdaptador = AdaptadorPacientes(tratamientosDB)
                 rcvPacientes.adapter = miAdaptador
+
             }
         }
+        fun actualizarDatos() {
+            CoroutineScope(Dispatchers.IO).launch {
+                val tratamientosDB = obtenerDatos()
+                withContext(Dispatchers.Main) {
+                    val miAdaptador = AdaptadorPacientes(tratamientosDB)
+                    rcvPacientes.adapter = miAdaptador
+                    miAdaptador.Actualizarlista(tratamientosDB)
+                }
+            }
+        }
+        obtenerDatos()
+        actualizarDatos()
         return root
     }
-
-
     private fun obtenerDatos(): List<dataClassPacientes> {
         val pacientes = mutableListOf<dataClassPacientes>()
         val objConexion = ClaseConexion().cadenaConexion()
@@ -85,6 +96,7 @@ class HomeFragment : Fragment() {
 
         return pacientes
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
