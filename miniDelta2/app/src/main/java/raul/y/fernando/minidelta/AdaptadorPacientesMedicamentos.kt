@@ -17,7 +17,7 @@ class AdaptadorPacientesMedicamentos(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.activity_detallepaciente, parent, false)
+            .inflate(R.layout.activity_item_pacientemed, parent, false)
         return ViewHolder(view)
     }
 
@@ -30,10 +30,9 @@ class AdaptadorPacientesMedicamentos(
     override fun getItemCount(): Int {
         return items.size
     }
-/*
+
     fun actualizarDatos(nuevosItems: List<dataClassPacientesMedicamentos>) {
         items = nuevosItems
         notifyDataSetChanged()
     }
- */
 }

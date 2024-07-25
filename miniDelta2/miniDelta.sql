@@ -12,14 +12,6 @@ CREATE TABLE Medicamentos (
 );
 ----Tablas dependientes----
 
-
-CREATE TABLE Pacientes_Medicamentos (
-    ID_pacientes_medicamentos INT PRIMARY KEY,
-    ID_Paciente INT,
-    ID_Medicamento INT,
-    Hora_Aplicacion DATE
-);
-
 CREATE TABLE PacientesBloom (
     ID_Paciente INT PRIMARY KEY,
     Nombres VARCHAR2(50),
@@ -28,6 +20,15 @@ CREATE TABLE PacientesBloom (
     Enfermedad VARCHAR2(50),
     id_habitacion INT
 );
+
+CREATE TABLE Pacientes_Medicamentos (
+    ID_pacientes_medicamentos INT PRIMARY KEY,
+    ID_Paciente INT,
+    ID_Medicamento INT,
+    Hora_Aplicacion DATE
+);
+
+INSERT INTO Pacientes_Medicamentos(ID_Paciente, ID_Medicamento, Hora_Aplicacion)VALUES(1, 2 ,TO_TIMESTAMP('2024-07-24 10:00:00', 'YYYY-MM-DD HH24:MI:SS'));
 
 ALTER TABLE PacientesBloom
 ADD CONSTRAINT fk_pacientes_habitaciones
@@ -53,6 +54,10 @@ CREATE SEQUENCE MedicamentosBloomSeq
 START WITH 1
 INCREMENT BY 1;
 
+CREATE SEQUENCE PacienteMedicamento
+START WITH 1
+INCREMENT BY 1;
+
 CREATE OR REPLACE TRIGGER Trigger_Pacientes 
 BEFORE INSERT ON PacientesBloom 
 FOR EACH ROW 
@@ -61,6 +66,7 @@ BEGIN
     INTO: NEW.ID_Paciente 
     FROM DUAL;
 END;
+
 CREATE OR REPLACE TRIGGER Trigger_habitaciones
 BEFORE INSERT ON habitaciones 
 FOR EACH ROW 
@@ -69,6 +75,7 @@ BEGIN
     INTO: NEW.id_habitacion 
     FROM DUAL;
 END;
+
 CREATE OR REPLACE TRIGGER Trigger_medicamentos
 BEFORE INSERT ON Medicamentos 
 FOR EACH ROW 
@@ -78,6 +85,14 @@ BEGIN
     FROM DUAL;
 END;
 
+CREATE OR REPLACE TRIGGER Trigger_PacientesMed 
+BEFORE INSERT ON Pacientes_Medicamentos 
+FOR EACH ROW 
+BEGIN 
+    SELECT PacienteMedicamento.NEXTVAL 
+    INTO: NEW.ID_pacientes_medicamentos 
+    FROM DUAL;
+END;
 
 INSERT ALL
     INTO Habitaciones (Numero_Habitacion, Numero_Cama) VALUES (1, 1)
@@ -131,4 +146,20 @@ DROP TRIGGER Trigger_habitaciones;
 
 Select * from PacientesBloom;
 Select * from habitaciones;
-SELECT p.ID_Paciente, p.Nombres, p.Apellidos, p.Edad, p.Enfermedad,h.id_habitacion, h.Numero_Habitacion, h.Numero_Cama FROM PacientesBloom p INNER JOIN Habitaciones h ON p.id_habitacion = h.id_habitacion
+SELECT p.ID_Paciente, p.Nombres, p.Apellidos, p.Edad, p.Enfermedad,h.id_habitacion, h.Numero_Habitacion, h.Numero_Cama FROM PacientesBloom p INNER JOIN Habitaciones h ON p.id_habitacion = h.id_habitacion;
+
+SELECT 
+    pm.ID_pacientes_medicamentos,
+    pm.Hora_Aplicacion,
+    p.ID_Paciente,
+    m.Nombre_Medicamento
+FROM 
+    Pacientes_Medicamentos pm
+INNER JOIN 
+    PacientesBloom p ON pm.ID_Paciente = p.ID_Paciente
+INNER JOIN 
+    Medicamentos m ON pm.ID_Medicamento = m.ID_Medicamento
+WHERE 
+    p.ID_Paciente = 1;
+
+COMMIT;

@@ -1,13 +1,9 @@
 package raul.y.fernando.minidelta
 
 import AdaptadorPacientesMedicamentos
-import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.Paint.Style
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
@@ -22,23 +18,24 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.resources.TextAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import raul.y.fernando.minidelta.ui.home.HomeFragment
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @Suppress("UNREACHABLE_CODE")
@@ -53,6 +50,7 @@ class activity_detallepaciente : AppCompatActivity() {
             insets
         }
         getSupportActionBar()?.hide()
+
         val txtNombre = findViewById<TextView>(R.id.txtNombre)
         val txtEdad = findViewById<TextView>(R.id.txtEdad)
         val txtEnfermedad = findViewById<TextView>(R.id.txtEnfermedad)
@@ -61,8 +59,7 @@ class activity_detallepaciente : AppCompatActivity() {
         val imgAtras = findViewById<ImageView>(R.id.imgAtras)
         val btnBorrar = findViewById<Button>(R.id.btnBorrar)
         val btnEditar = findViewById<Button>(R.id.btnEditar)
-        val rcvPacienteMedicamento =
-            findViewById<RecyclerView>(R.id.recyclerViewPacienteMedicamento)
+        val rcvPacienteMedicamento = findViewById<RecyclerView>(R.id.recyclerViewPacienteMedicamento)
         val btnAgregarMedicamento = findViewById<Button>(R.id.btnAgregarMedicamento)
 
 
@@ -83,8 +80,8 @@ class activity_detallepaciente : AppCompatActivity() {
         txtCama.text = numero_cama.toString()
 
         rcvPacienteMedicamento.layoutManager = LinearLayoutManager(this)
-        CoroutineScope(Dispatchers.IO).launch {
-            val medicamentosPaciente = mostrarPacientesMedicamento(ID_Paciente, )
+        CoroutineScope(Dispatchers.Default).launch {
+            val medicamentosPaciente = mostrarPacientesMedicamento(ID_Paciente)
             withContext(Dispatchers.Main) {
                 val miAdaptador = AdaptadorPacientesMedicamentos(medicamentosPaciente)
                 rcvPacienteMedicamento.adapter = miAdaptador
@@ -108,7 +105,6 @@ class activity_detallepaciente : AppCompatActivity() {
                 }
             }
         }
-
 
         btnBorrar.setOnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -181,13 +177,13 @@ class activity_detallepaciente : AppCompatActivity() {
         }
 
         btnAgregarMedicamento.setOnClickListener {
-            RecetarDialog()
+            RecetarDialog(ID_Paciente)
         }
 
     }
 
 
-    fun RecetarDialog() {
+    fun RecetarDialog(ID_Paciente: Int) {
         val dialog = Dialog(this, R.style.customdialog)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.customdialog)
@@ -203,13 +199,15 @@ class activity_detallepaciente : AppCompatActivity() {
 
         val spnMedicamento = dialog.findViewById<Spinner>(R.id.spnMedicamento)
 
-        // Mueve el código de obtención de medicamentos dentro de una corrutina
         CoroutineScope(Dispatchers.IO).launch {
             val listaMedicamentos = obtenerMedicamentos()
             val nombreMedicamento = listaMedicamentos.map { it.Nombre_Medicamento }
-
             withContext(Dispatchers.Main) {
-                val miAdaptador = ArrayAdapter(this@activity_detallepaciente, android.R.layout.simple_spinner_dropdown_item, nombreMedicamento)
+                val miAdaptador = ArrayAdapter(
+                    this@activity_detallepaciente,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    nombreMedicamento
+                )
                 spnMedicamento.adapter = miAdaptador
             }
         }
@@ -232,10 +230,59 @@ class activity_detallepaciente : AppCompatActivity() {
             timePickerDialog.show()
         }
 
-        val btnRecetado = dialog.findViewById<Button>(R.id.btnRecetado)
-        btnRecetado.setOnClickListener {
-            dialog.dismiss() // Cierra el diálogo en lugar de finalizar la actividad
-        }
+            val btnRecetado = dialog.findViewById<Button>(R.id.btnRecetado)
+            btnRecetado.setOnClickListener {
+                GlobalScope.launch(Dispatchers.IO) {
+                    val listaMedicamentos = obtenerMedicamentos()
+                    val nombreMedicamento = listaMedicamentos.map { it.Nombre_Medicamento }
+                    try {
+                        val objConexion = ClaseConexion().cadenaConexion()
+
+                        val addPaciente = objConexion?.prepareStatement(
+                            "INSERT INTO Pacientes_Medicamentos(ID_Paciente, ID_Medicamento, Hora_Aplicacion) VALUES (?, ?, ?)"
+                        )!!
+
+                        // Asegúrate de que ID_Paciente es válido
+                        addPaciente.setInt(1, ID_Paciente)
+
+                        // Obtener el nombre del medicamento seleccionado
+                        val nombreSeleccionado = spnMedicamento.selectedItem.toString()
+
+                        // Obtener el ID del medicamento basado en el nombre seleccionado
+                        val medicamentoSeleccionado = listaMedicamentos.find { it.Nombre_Medicamento == nombreSeleccionado }
+                            ?: throw IllegalArgumentException("ID de medicamento inválido para el nombre $nombreSeleccionado")
+
+                        val medicamentoId = medicamentoSeleccionado.id_medicamento
+
+                        addPaciente.setInt(2, medicamentoId)
+
+                        // Convertir el horario a Timestamp
+                        val horarioSeleccionado = horario.text.toString()
+                        val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
+                        val fechaConHora: Date = formatoHora.parse(horarioSeleccionado)
+                        val timestamp = Timestamp(fechaConHora.time)
+
+                        addPaciente.setTimestamp(3, timestamp)
+
+                        // Ejecutar la inserción
+                        val filasInsertadas = addPaciente.executeUpdate()
+
+                        withContext(Dispatchers.Main) {
+                            if (filasInsertadas > 0) {
+                                Toast.makeText(this@activity_detallepaciente, "Medicamento Recetado", Toast.LENGTH_SHORT).show()
+                                finish()
+                            } else {
+                                Toast.makeText(this@activity_detallepaciente, "Error al insertar: No se insertaron filas", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@activity_detallepaciente, "Error al recetar medicamento: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                        e.printStackTrace()
+                    }
+                }
+            }
 
         val txtCancel = dialog.findViewById<TextView>(R.id.txtCancel)
         txtCancel.setOnClickListener {
@@ -309,7 +356,7 @@ class activity_detallepaciente : AppCompatActivity() {
         }
     }
 
-    suspend fun mostrarPacientesMedicamento(idPaciente: Int): List<dataClassPacientesMedicamentos> = withContext(Dispatchers.IO) {
+    suspend fun mostrarPacientesMedicamento(idPaciente: Int): List<dataClassPacientesMedicamentos> = withContext(Dispatchers.Default) {
         val listaMedicamentos = mutableListOf<dataClassPacientesMedicamentos>()
         var objConexion: Connection? = null
         var preparedStatement: PreparedStatement? = null

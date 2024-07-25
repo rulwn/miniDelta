@@ -11,12 +11,14 @@ class ClaseConexion {
             val contrasena = "ITR2024"
             val connection = DriverManager.getConnection(url, usuario, contrasena)
             return connection
+
         }catch (e: Exception){
             println("Error en la conexion AQUI!!!: $e")
             return null
         }
     }
 }
+
 
 /*
 --Raul--
