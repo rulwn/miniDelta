@@ -26,6 +26,6 @@ val contrasena = "deltawins"
 
 --Huezo--
 val url = "jdbc:oracle:thin:@192.168.1.12:1521:xe"
-val usuario = "HUEZO_DEV"
-val contrasena = "k1nMDq"
+val usuario = "SYSTEM"
+val contrasena = "ITR2024"
 */

@@ -67,7 +67,7 @@ class activity_agregarPacientes : AppCompatActivity() {
         }
 
 
-        fun ObtenerDoctores(): List<dataClassHabitaciones>{
+         fun ObtenerDoctores(): List<dataClassHabitaciones>{
             val objConexion = ClaseConexion().cadenaConexion()
             val statement = objConexion?.createStatement()
             val resultSet = statement?.executeQuery("SELECT * FROM Habitaciones")!!
